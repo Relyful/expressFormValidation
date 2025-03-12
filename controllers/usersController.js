@@ -1,6 +1,7 @@
 // controllers/usersController.js
 
 // This just shows the new stuff we're adding to the existing contents
+const { query } = require("express");
 const usersStorage = require("../storages/usersStorage");
 const { body, validationResult } = require("express-validator");
 
@@ -23,6 +24,14 @@ const validateUser = [
     .optional({ values: "falsy"})
     .isLength({ min: 0, max: 200}).withMessage(`Must be between 0 and 200 characters!`),
 ];
+
+const validateSearch = [
+  body("lastName").trim()
+    .isAlpha().withMessage(`Last name ${alphaErr}`)
+    .isLength({ min: 1, max: 10 }).withMessage(`Last name ${lengthErr}`),
+  body("email").trim()
+    .isEmail().withMessage(`Must be valid email.`),
+]
 
 // We can pass an entire array of middleware validations to our controller.
 exports.usersCreatePost = [
@@ -88,7 +97,30 @@ exports.usersCreateGet = (req, res) => {
 };
 
 exports.searchUserGet = (req, res) => {
-  res.render("searchUser.ejs", {
+  res.render("searchUser", {
     title: "Search user",
   });
 };
+
+exports.search = [
+  validateSearch, 
+  (req, res) => {
+  const { lastName, email } = req.query;  
+  let user;
+  if (email === "") {
+    user = usersStorage.getUserLastName(lastName);
+  } else {
+    user = usersStorage.getUserEmail(email);
+  }
+  console.log(user);
+  
+  if (user == 0) {
+    return res.render("searchUser", {
+      title: "Search user",
+    });
+  }
+  res.render("searchUser", {
+    title: "Search user",
+    user: user,
+  });
+}];
