@@ -86,3 +86,9 @@ exports.usersCreateGet = (req, res) => {
     title: "Create user",
   });
 };
+
+exports.searchUserGet = (req, res) => {
+  res.render("searchUser.ejs", {
+    title: "Search user",
+  });
+};
